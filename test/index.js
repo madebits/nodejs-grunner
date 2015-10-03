@@ -1,8 +1,9 @@
 "use strict";
 
-require('require-dir')('./');
+//require('require-dir')('./');
+require('./wf.js');
 
-var t = require('tape');
+let t = require('tape');
 
 //t.only('dependency cycle');
 
