@@ -5,7 +5,7 @@ require('require-dir')('./');
 
 let t = require('tape');
 
-//t.only('max life');
+//t.only('start pipe');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {

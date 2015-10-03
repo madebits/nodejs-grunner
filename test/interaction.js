@@ -114,3 +114,51 @@ test('external task', function(t){
     g.run('t1', err => t.end(err));
 
 });
+
+test('start pipe', function(t) {
+
+    let g = new G({log: msg => { } });
+    t.plan(3);
+
+    let sequence = function* () {
+        yield 'a';
+        yield 'b';
+        yield 'c';
+    };
+
+    let res = [];
+
+    g.t('tt', cb => {
+        return cb.startPipe(sequence()).pipe(through.obj((o, e, _cb) => {
+            res.push(o);
+            _cb();
+        }));
+    });
+
+    g.run('tt', err => {
+        t.is(res[0], 'a');
+        t.is(res[1], 'b');
+        t.is(res[2], 'c');
+        t.end(err);
+    });
+});
+
+test('start pipe null', function(t) {
+
+    let g = new G({log: msg => { } });
+    t.plan(1);
+
+    let res = [];
+
+    g.t('tt', cb => {
+        return cb.startPipe().pipe(through.obj((o, e, _cb) => {
+            res.push(o);
+            _cb();
+        }));
+    });
+
+    g.run('tt', err => {
+        t.is(res.length, 0);
+        t.end(err);
+    });
+});

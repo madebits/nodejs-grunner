@@ -174,6 +174,7 @@ class GRunner {
         };
         doneCb.ctx = ctx;
         doneCb.onDone = resHandler;
+        doneCb.startPipe = _this._startPipe;
 
         if(_this.options.beforeTaskRun) _this.options.beforeTaskRun(ctx);
         let taskFun = (task.cb && !_this.options.dryRun) ? task.cb : cb => cb();
@@ -188,6 +189,24 @@ class GRunner {
             return;
         }
         _this._handleResult(taskName, res, doneCb);
+    }
+
+    _startPipe(o) {
+        let s = through.obj(function(obj, enc, cb) {
+            cb(null, obj);
+        });
+        if(o) {
+            for(let x of o) {
+                let temp = x;
+                process.nextTick(function() {
+                    s.write(temp);
+                });
+            }
+        }
+        process.nextTick(function() {
+            s.end();
+        });
+        return s;
     }
 
     log(msg, isErr) {
