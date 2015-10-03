@@ -34,7 +34,7 @@ test('gulp', function(t){
         }));
     });
 
-    g.options.afterTaskRun = function() {
+    g.options.afterTaskRun = () => {
         t.pass();
         t.end();
     };
@@ -55,7 +55,7 @@ test('gulp handle', function(t){
         cb.onDone(s, () => cb());
     });
 
-    g.options.afterTaskRun = function() {
+    g.options.afterTaskRun = () => {
         t.pass();
         t.end();
     };
@@ -70,10 +70,10 @@ test('gulp handle null', function(t){
         cb.onDone();
     });
 
-    g.options.afterTaskRun = function() {
+    g.options.afterTaskRun = () => {
         t.pass('after');
     };
 
-    g.run('t1', () => t.end());
+    g.run('t1', err => t.end(err));
 
 });
