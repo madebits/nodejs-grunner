@@ -15,7 +15,7 @@ let taskName = G._toArray(argv.gtask || 'default');
 
 dirNameRec.forEach(f => {
     let p = path.resolve(f);
-    console.log(`Dir:  ${p}`);
+    console.log(`DirR:  ${p}`);
     rd(path.resolve(p), { recurse: true });
 });
 
