@@ -1,13 +1,13 @@
 {
   "name": "grunner",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "GRunner is a task runner for Node.js compatible with Gulp plugins",
   "main": "./index.js",
   "scripts": {
     "test": "node ./test/index.js",
     "push": "node -p \"new Date().toISOString();\" && npm publish ./"
   },
-  "author": "madebits.com",
+  "author": "madebits <contact@madebits.33mail.com> (https://github.com/madebits/)",
   "license": "MIT",
   "dependencies": {
     "async": "^1.5.2",
