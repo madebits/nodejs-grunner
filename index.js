@@ -1,6 +1,6 @@
 'use strict';
 
-let __ = require('async')
+const __ = require('async')
     , Stream = require('stream').Stream
     , through = require('through2')
     , util = require('util')
@@ -9,7 +9,7 @@ let __ = require('async')
 
 function CircularDependencyError(value) {
     this.message = value;
-    let error = new Error(this.message);
+    const error = new Error(this.message);
     this.stack = error.stack;
 }
 CircularDependencyError.prototype = Object.create(Error.prototype);
@@ -37,20 +37,20 @@ class GRunner {
     }
 
     _depMap(dependencies, ctx, stack) {
-        let _this = this;
-        let serFun = [];
+        const _this = this;
+        const serFun = [];
         dependencies = GUtils.toArray(dependencies);
         if(!dependencies.length) {
             return serFun;
         }
         ctx = _this._incCtx(ctx, 's');
-        let depFun = dependencies.filter(d => !!d).map(d => {
+        const depFun = dependencies.filter(d => !!d).map(d => {
             if(Array.isArray(d)) {
                 return __cb => {
-                    let f = d.filter(pd => !!pd).map(pd => {
+                    const f = d.filter(pd => !!pd).map(pd => {
                         return __cb => {
                             if(Array.isArray(pd)) {
-                                let nestedSerFun = _this._depMap(pd, ctx, stack);
+                                const nestedSerFun = _this._depMap(pd, ctx, stack);
                                 __.series(nestedSerFun, __cb);
                                 return;
                             }
@@ -69,10 +69,10 @@ class GRunner {
     }
 
     _runner(taskName, cb, ctx, stack) {
-        let _this = this;
+        const _this = this;
         if(!taskName) throw new Error('taskName required');
         if(!cb) throw new Error('cb required');
-        let task = _this.tasks[taskName];
+        const task = _this.tasks[taskName];
         if(!task) throw new Error('Undefined task: ' + taskName);
         _this.log(`Run: ${taskName}`);
         if(!_this.options.noLoopDetection) {
@@ -86,7 +86,7 @@ class GRunner {
         }
         //console.log(stack);
         ctx = _this._cloneCtx(ctx);
-        let serFun = _this._depMap(task.dep, ctx, stack);
+        const serFun = _this._depMap(task.dep, ctx, stack);
         serFun.push(__cb => {
             _this._exec(taskName, task, __cb, ctx);
         });
@@ -105,7 +105,7 @@ class GRunner {
         if(!this.tasks) this.tasks = {};
         if(!taskName) taskName = 'default';
         this.log(`Start${this.options.dryRun ? ' [!DryRun!]' : ''} [${taskName}]`);
-        let doneCb = err => {
+        const doneCb = err => {
             let msg = `End [${err ? 'Failed' : 'Success'}]`;
             if(err) msg += `\n# Failed: ${err}`;
             this.log(msg);
@@ -131,7 +131,7 @@ class GRunner {
                 doneCb(err);
                 res.end();
             });
-            let onPipeEnd = through.obj((o, enc, cb) => cb(), cb => {
+            const onPipeEnd = through.obj((o, enc, cb) => cb(), cb => {
                 doneCb(); cb();
             } );
             res.pipe(onPipeEnd);
@@ -140,13 +140,13 @@ class GRunner {
     }
 
     _exec(taskName, task, cb, info) {
-        let _this = this;
-        let ctx = Object.assign(_this._cloneCtx(info), { taskName, runner: _this, task });
+        const _this = this;
+        const ctx = Object.assign(_this._cloneCtx(info), { taskName, runner: _this, task, log: (m, e) => _this.log(m, e, taskName) });
         const pad = new Array(ctx.depth + 1).join('.');
         const parallel = ctx.type.endsWith('p') ? '|' : '';
         this.log(`+ ${pad}${parallel} ${taskName}${_this.options.verbose ? ' ' + ctx.type : ''}`);
 
-        let doneCb = (function (){
+        const doneCb = (function (){
             let doneCbCalled = false;
             return err => {
                 if(doneCbCalled) return;
@@ -158,7 +158,7 @@ class GRunner {
             };
         })();
 
-        let resHandler = (result, callback) => {
+        const resHandler = (result, callback) => {
             if(!callback) callback = doneCb;
             if(!res) {
                 callback();
@@ -170,7 +170,7 @@ class GRunner {
         doneCb.onDone = resHandler;
 
         if(_this.options.beforeTaskRun) _this.options.beforeTaskRun(ctx);
-        let taskFun = (task.cb && !_this.options.dryRun) ? task.cb : cb => cb();
+        const taskFun = (task.cb && !_this.options.dryRun) ? task.cb : cb => cb();
 
         let res = null;
         try {
@@ -185,7 +185,7 @@ class GRunner {
     }
 
     log(msg, isErr, taskName) {
-        let _this = this;
+        const _this = this;
         if(this.options.log) {
             this.options.log(msg, isErr, taskName);
             return;
@@ -210,7 +210,7 @@ class GRunner {
 
     addTask(taskName, taskDependencies, taskFun, userData) {
         if(!GUtils.isStr(taskName)) throw new Error('taskName required string');
-        let setNull = o => { if(o === undefined) { o = null; } return o; };
+        const setNull = o => { if(o === undefined) { o = null; } return o; };
         taskDependencies = setNull(taskDependencies);
         taskFun = setNull(taskFun);
         userData = setNull(userData);
@@ -234,13 +234,13 @@ class GRunner {
     }
 
     dumpTasks(logger) {
-        let l = !!logger ? logger : console.log;
-        let keys = Object.keys(this.tasks);
+        const l = !!logger ? logger : console.log;
+        const keys = Object.keys(this.tasks);
         if(!keys) return;
         let totalLines = 0;
         l('# TaskName : Dependencies : TaskFun (code lines)');
         keys.sort().forEach(k => {
-            let t = this.tasks[k];
+            const t = this.tasks[k];
             let tf = '(*)';
             if(!!t.cb) {
                 tf = (t.cb.toString().match(/\n/g) || []).length;
@@ -272,7 +272,7 @@ class GRunner {
     }
 
     setProcessMaxLifeTime(timeInMinutes, cb) {
-        let _this = this;
+        const _this = this;
         if(_this.lifeTimer) {
             clearTimeout(_this.lifeTimer);
             _this.log('Maximum process life timer off!');
@@ -298,14 +298,14 @@ class GRunner {
     }
 
     fileReadTxt(file, throwErr) {
-        let data = GUtils.readFile(file, 'utf8', throwErr);
+        const data = GUtils.readFile(file, 'utf8', throwErr);
         if(data === null) return null;
         return data.replace(/^\uFEFF/, '');
     }
 
     fileReadJson(file, throwErr) {
         try {
-            let data = this.fileReadTxt(file);
+            const data = this.fileReadTxt(file);
             if(data === null) return null;
             return JSON.parse(data);
         } catch(e) {
@@ -341,7 +341,7 @@ class GRunner {
 } //EOC
 
 if(!GLOBAL.CCA2AB34EC9C4040A54324D4348540E7) {
-    let g = new GRunner(); // per process
+    const g = new GRunner(); // per process
     g.GRunner = GRunner;
     GLOBAL.CCA2AB34EC9C4040A54324D4348540E7 = g;
 }
