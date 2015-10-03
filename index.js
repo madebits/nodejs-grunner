@@ -501,7 +501,7 @@ class GRunner {
         };
 
         if(dir) {
-            var dirs = this._toArray(dir).map(d => __cb => {
+            let dirs = this._toArray(dir).map(d => __cb => {
                 d = path.resolve(d);
                 scan(d, d, function(err) {
                     __cb(err);
