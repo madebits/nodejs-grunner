@@ -174,15 +174,14 @@ test('run', t => {
 
 test('run once', t => {
 
-    const once = (ucb) => {
+    const once = ucb => {
         return cb => {
-            if(cb.ctx.task.once) {
-                cb();
-                return;
+            if(!cb.ctx.task.once) {
+                cb.ctx.task.once = true;
+                cb.ctx.runner.log('@once', false, cb.ctx.taskName);
+                return ucb(cb);
             }
-            cb.ctx.task.once = true;
-            cb.ctx.runner.log('@once', false, cb.ctx.taskName);
-            return ucb(cb);
+            cb();
         };
     };
 
