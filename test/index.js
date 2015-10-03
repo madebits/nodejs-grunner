@@ -5,7 +5,7 @@ require('require-dir')('./');
 
 let t = require('tape');
 
-//t.only('null dep');
+t.only('env');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {

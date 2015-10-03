@@ -316,7 +316,7 @@ class GRunner {
 
     _parseVars(str, handler) {
         function process(s) {
-            if(!s) return s;
+            if(!s) return '';
             return s.replace(/\[\[(.+?)\]\]/g, function(m, e){
                 let v = handler(e);
                 return v ? process(v) : '';
@@ -330,7 +330,7 @@ class GRunner {
     }
 
     env(e) {
-        return this.envValue(process.env[e]);
+        return this.envValue(process.env[e] || '');
     }
 
     setProcessMaxLifeTime(timeInMinutes, cb) {
