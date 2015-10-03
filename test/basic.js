@@ -1,7 +1,7 @@
 "use strict";
 
-let test = require('tape');
-let G = require('../index').GRunner;
+const test = require('tape');
+const G = require('../index').GRunner;
 
 test('add task', function(t) {
     let g = new G({log: msg => { } });
@@ -186,7 +186,7 @@ test('run once', t => {
         };
     };
 
-    let g = new G(); //{ log: () => {} }); //
+    const g = new G(); //{ log: () => {} }); //
     t.plan(1);
     g.t('t0');
     g.t('t1', 't0', once(cb => {
