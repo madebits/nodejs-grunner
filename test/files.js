@@ -127,7 +127,5 @@ test('file write', t => {
     let d = g.fileReadJson('./test/temp/a.json', true);
     t.is(d.a, 5);
 
-    g.rm('./test/temp');
-
     t.end();
 });

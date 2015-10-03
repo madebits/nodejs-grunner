@@ -332,12 +332,6 @@ class GRunner {
         return GUtils.files(dir, recursive, filter);
     }
 
-    rm(dirOrFile) {
-        if(!dirOrFile) return;
-        GUtils.toArray(dirOrFile)
-            .forEach(d => GUtils.del(d));
-    }
-
 } //EOC
 
 if(!GLOBAL.CCA2AB34EC9C4040A54324D4348540E7) {
