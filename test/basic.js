@@ -171,3 +171,30 @@ test('run', t => {
     g.t('tt', ['t1', 't2', 't3']);
     g.run('tt', t.end);
 });
+
+test('run once', t => {
+
+    let once = (ucb) => {
+        return cb => {
+            if(cb.ctx.task.once) {
+                cb();
+                return;
+            }
+            cb.ctx.task.once = true;
+            cb.ctx.runner.log(`@Once: ${cb.ctx.taskName}`, false, cb.ctx.taskName);
+            return ucb(cb);
+        };
+    };
+
+    let g = new G(); //{ log: () => {} }); //
+    t.plan(1);
+    g.t('t0');
+    g.t('t1', 't0', once(cb => {
+        t.pass('called');
+        cb();
+    }));
+    g.t('t2', 't1');
+    g.t('t3', 't2');
+    g.t('tt', ['t3', 't2', 't1']);
+    g.run('tt', t.end);
+});
