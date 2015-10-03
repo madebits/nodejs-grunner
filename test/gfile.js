@@ -1,5 +1,5 @@
 "use strict";
-let G = require('../lib/GRunner');
+let G = require('../index');
 
 G.t('t1', (cb) => {
     console.log('test');

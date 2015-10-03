@@ -234,7 +234,7 @@ class GRunner {
         let keys = Object.keys(this.tasks);
         if(!keys) return;
         let totalLines = 0;
-        l('# TaskName : Dependecies : TaskFun (code lines)');
+        l('# TaskName : Dependencies : TaskFun (code lines)');
         keys.sort().forEach(k => {
             let t = this.tasks[k];
             let tf = '(*)';

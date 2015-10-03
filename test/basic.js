@@ -1,7 +1,7 @@
 "use strict";
 
 let test = require('tape');
-let G = require('../lib/GRunner').GRunner;
+let G = require('../index').GRunner;
 
 test('add task', function(t) {
     let g = new G({log: msg => { } });
@@ -31,56 +31,6 @@ test('add task with dep', function(t) {
     t.is(g.tasks['t1'].cb, null, 'cb');
     t.is(g.tasks['t1'].dep.length, 1, 'dep');
     t.end();
-});
-
-test('order', function(t) {
-    let g = new G({ verbose: true });
-
-    let runTasks = [];
-
-    let tf = cb => {
-        runTasks.push(cb.ctx.taskName);
-        cb();
-    };
-
-    for(let i = 1; i < 9; i++) {
-        let td = (i > 1) ? [ 't' + (i - 1) ] : [];
-        g.t('t' + i, td, tf);
-    }
-
-    g.t('tt', ['t1', 't2', ['t3', 't4'] ], tf);
-
-    g.run('tt', () => {
-        t.end();
-    });
-
-});
-
-test('order2', function(t) {
-    let g = new G({verbose: true});
-
-    let runTasks = [];
-
-    let tf = (cb) => {
-        setTimeout(() => {
-            runTasks.push(cb.ctx.taskName);
-            cb();
-        }, 100);
-    };
-
-    for(let i = 1; i < 9; i++) {
-        g.t('t' + i, tf);
-    }
-
-    g.t('t2', ['t5', 't6', 't7', 't8']);
-
-    g.t('tt', [['t1', 't2', 't3', 't4']], tf);
-
-    g.run('tt', () => {
-        console.log(runTasks);
-        t.end();
-    });
-
 });
 
 test('user data', function(t) {

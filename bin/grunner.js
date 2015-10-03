@@ -3,7 +3,7 @@
 "use strict";
 
 let __ = require('async')
-    , G = require('./../lib/GRunner')
+    , G = require('./../index')
     , fs = require('fs')
     , path = require('path')
     , rd = require('require-dir')

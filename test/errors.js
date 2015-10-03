@@ -1,7 +1,7 @@
 "use strict";
 
 let test = require('tape');
-let G = require('../lib/GRunner').GRunner;
+let G = require('../index').GRunner;
 let gulp = require('gulp');
 let through = require('through2');
 
@@ -52,7 +52,6 @@ test('error async', function(t) {
                 throw new Error('qwerty');
             }catch(e) {
                 cb(e);
-                return;
             }
         }, 100);
 

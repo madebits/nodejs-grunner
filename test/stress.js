@@ -1,7 +1,7 @@
 "use strict";
 
 let test = require('tape');
-let G = require('../lib/GRunner').GRunner;
+let G = require('../index').GRunner;
 
 test('stress', function(t) {
     let g = new G({ log: () => {} });
