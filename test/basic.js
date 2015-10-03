@@ -85,3 +85,69 @@ test('order2', function(t) {
     });
 
 });
+
+test('user data', function(t) {
+    let g = new G({log: msg => { } });
+    g.t('t1', (cb, ctx) => {
+        t.is(ctx.task.userData.a, 5);
+        ctx.task.userData.a = 10;
+        cb();
+    }, { a: 5 });
+    g.run('t1', () => {
+        t.is(g.tasks['t1'].userData.a, 10);
+        t.end();
+    });
+});
+
+test('t.overload', function(t) {
+    let g = new G({log: msg => { } });
+    g.t('t1');
+    t.isNot(g.tasks['t1'], null);
+    t.is(g.tasks['t1'].cb, null);
+    t.is(g.tasks['t1'].dep.length, 0);
+    t.is(g.tasks['t1'].userData, null);
+
+    let td = [ 't3' ];
+    let tf = () => {};
+    let tu = 'abc';
+
+    g.t('t2', tf);
+    t.isNot(g.tasks['t2'], null);
+    t.is(g.tasks['t2'].cb, tf);
+    t.is(g.tasks['t2'].dep.length, 0);
+    t.is(g.tasks['t2'].userData, null);
+
+    g.t('t3', tf, tu);
+    t.isNot(g.tasks['t3'], null);
+    t.is(g.tasks['t3'].cb, tf);
+    t.is(g.tasks['t3'].dep.length, 0);
+    t.is(g.tasks['t3'].userData, tu);
+
+    g.t('t4', td, tf, tu);
+    t.isNot(g.tasks['t4'], null);
+    t.is(g.tasks['t4'].cb, tf);
+    t.is(g.tasks['t4'].dep, td);
+    t.is(g.tasks['t4'].userData, tu);
+
+    g.t('t5', td, tf);
+    t.isNot(g.tasks['t5'], null);
+    t.is(g.tasks['t5'].cb, tf);
+    t.is(g.tasks['t5'].dep, td);
+    t.is(g.tasks['t5'].userData, null);
+
+    t.end();
+});
+
+test('exec', function(t) {
+    t.plan(3);
+    let g = new G({log: msg => { }, exec: (doneCb, ctx) => {
+        ctx.task.userData = 'abc';
+        t.pass();
+        ctx.task.cb(doneCb, ctx);
+    } });
+    g.t('t1', (cb, ctx) => {
+        t.is(ctx.task.userData, 'abc');
+        t.pass();
+    }, { a: 5 });
+    g.run('t1');
+});

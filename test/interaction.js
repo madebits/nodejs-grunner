@@ -43,3 +43,24 @@ test('gulp', function(t){
 
 });
 
+
+test('gulp handle', function(t){
+    let g = new G({log: msg => { } });
+    g.t('t1', function(cb, ctx) {
+        let s = gulp.src('./test/interaction.js')
+            .pipe(throught.obj((o, e, _cb) => {
+                t.ok(o.path.endsWith('interaction.js'));
+                _cb();
+            }));
+        ctx.onDone(s, cb);
+    });
+
+    g.options.afterTaskRun = function() {
+        t.pass();
+        t.end();
+    };
+
+    g.run('t1');
+
+});
+
