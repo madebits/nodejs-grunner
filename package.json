@@ -16,6 +16,7 @@
     "yargs": "^3.32.0"
   },
   "devDependencies": {
+    "gspawn": "0.0.3",
     "gulp": "^3.9.0",
     "tape": "^4.4.0"
   },
@@ -23,8 +24,8 @@
   "engines": {
     "node": ">= 5.0.0"
   },
-  "repository" :
-  { "type" : "git"
-  , "url" : "https://github.com/madebits/nodejs-grunner.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madebits/nodejs-grunner.git"
   }
 }

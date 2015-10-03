@@ -4,6 +4,7 @@ let test = require('tape');
 let G = require('../index').GRunner;
 let gulp = require('gulp');
 let through = require('through2');
+let gspawn = require('gspawn');
 
 test('promise', function(t) {
 
@@ -73,6 +74,22 @@ test('gulp handle null', function(t){
     g.options.afterTaskRun = () => {
         t.pass('after');
     };
+
+    g.run('t1', err => t.end(err));
+
+});
+
+test('tool', function(t){
+    let g = new G({log: msg => { } });
+    g.t('t1', function(cb) {
+        gspawn({
+            cmd: 'bash',
+            args: ['-c', 'ls -l'],
+            resolveCmd: true,
+            collectStdout: true,
+            logCall: true
+        }, cb);
+    });
 
     g.run('t1', err => t.end(err));
 
