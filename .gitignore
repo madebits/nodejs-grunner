@@ -1,3 +1,4 @@
 node_modules/
 .idea/
 .Rhistory
+npm-debug.log
