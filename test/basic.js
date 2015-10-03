@@ -142,3 +142,17 @@ test('dynamic task', function(t) {
     g.t('tt', ['t1', 't2', 't3']);
     g.run('tt', t.end);
 });
+
+test('run', function(t) {
+    let g = new G({ log: () => {} }); //
+    t.plan(1);
+    g.t('t1', cb => {
+        t.pass('called');
+    });
+    g.t('t2');
+    g.t('t3', 't2', cb => {
+        g.run('t1', cb);
+    });
+    g.t('tt', ['t1', 't2', 't3']);
+    g.run('tt', t.end);
+});
