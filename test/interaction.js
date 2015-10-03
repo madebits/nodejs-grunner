@@ -192,7 +192,7 @@ test('through pipe', function(t) {
             res2.push(o);
             console.log(o);
             _cb();
-        }));;
+        }));
     });
 
     g.run('tt', err => {
