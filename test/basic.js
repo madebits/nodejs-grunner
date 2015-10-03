@@ -16,7 +16,7 @@ test('add task', function(t) {
 test('add task with body', function(t) {
     let g = new G({log: msg => { } });
     t.isNotEqual(g.tasks, null);
-    g.t('t1', (cb) => { cb(); });
+    g.t('t1', cb => cb());
     t.not(g.tasks['t1'], null, 'task');
     t.not(g.tasks['t1'].cb, null, 'cb');
     t.is(g.tasks['t1'].dep.length, 0, 'dep');
@@ -38,7 +38,7 @@ test('order', function(t) {
 
     let runTasks = [];
 
-    let tf = (cb) => {
+    let tf = cb => {
         runTasks.push(cb.ctx.taskName);
         cb();
     };
@@ -69,8 +69,6 @@ test('order2', function(t) {
     };
 
     for(let i = 1; i < 9; i++) {
-        //let td = (i > 1) ? [ 't' + (i - 1) ] : [];
-        //g.t('t' + i, td, tf);
         g.t('t' + i, tf);
     }
 
@@ -139,20 +137,20 @@ test('t.overload', function(t) {
 
 test('exec', function(t) {
     let g = new G({log: msg => { },
-        exec: (doneCb) => {
+        exec: doneCb => {
             doneCb.ctx.task.userData = 'abc';
             t.pass('called exec');
             doneCb.ctx.task.cb(doneCb);
         },
-        beforeTaskRun: (ctx) => {
+        beforeTaskRun: ctx => {
             t.pass('before');
         },
-        afterTaskRun: (ctx) => {
+        afterTaskRun: ctx => {
             t.pass('after');
             ctx.task.userData ='aaa';
         }
     });
-    g.t('t1', (cb) => {
+    g.t('t1', cb => {
         t.is(cb.ctx.task.userData, 'abc', 'user data');
         t.isNot(cb.onDone, null, 'onDone present');
         t.isNot(cb.ctx.task, null, 'task present');
@@ -168,7 +166,7 @@ test('exec', function(t) {
 test('dynamic dep', function(t) {
     let g = new G({ log: () =>{} });
     t.plan(1);
-    g.t('t1', (cb) => {
+    g.t('t1', cb => {
         t.pass('called');
         g.tasks.t2.dep = [];
         cb();
@@ -176,21 +174,21 @@ test('dynamic dep', function(t) {
     g.t('t2', ['t1']);
     g.t('t3', ['t2']);
     g.t('tt', ['t1', 't2', 't3']);
-    g.run('tt', (err) => { t.end(err); });
+    g.run('tt', t.end);
 });
 
 test('dynamic task', function(t) {
     let g = new G({ log: () => {} }); //
     t.plan(1);
-    g.t('t1', (cb) => {
+    g.t('t1', cb => {
         t.pass('called');
         g.t('t4', ['t5']);
-        g.t('t5', (cb)=>{ cb(); });
+        g.t('t5', cb => cb());
         g.tasks.t2.dep = ['t4'];
         cb();
     });
     g.t('t2', ['t1']);
     g.t('t3', ['t2']);
     g.t('tt', ['t1', 't2', 't3']);
-    g.run('tt', (err) => { t.end(err); });
+    g.run('tt', t.end);
 });

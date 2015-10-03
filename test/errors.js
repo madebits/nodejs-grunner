@@ -9,11 +9,11 @@ test('error returned in cb', function(t) {
 
     let g = new G({ });
 
-    g.t('t1', function(cb) {
+    g.t('t1', cb => {
         cb(new Error('qwerty-cb'));
         cb();
     });
-    g.t('t2', function(cb) { cb(); });
+    g.t('t2', cb => cb());
     g.t('tt', ['t1', 't2']);
 
     g.run('tt', err => {
@@ -27,10 +27,10 @@ test('error thrown', function(t) {
 
     let g = new G({ log: msg => { } });
 
-    g.t('t1', function(cb) {
+    g.t('t1', cb => {
         throw new Error('qwerty');
     });
-    g.t('t2', function(cb) { cb(); });
+    g.t('t2', cb => cb());
     g.t('tt', ['t1', 't2']);
 
     g.run('tt', err => {
@@ -44,10 +44,10 @@ test('error async', function(t) {
 
     let g = new G({ log: msg => { } });
 
-    g.t('t1', function(cb) {
+    g.t('t1', cb => {
         setTimeout(() => {
             // throw new Error('qwerty'); // wrong, node cannot handle this
-            // right
+            // right:
             try {
                 throw new Error('qwerty');
             }catch(e) {
@@ -57,7 +57,7 @@ test('error async', function(t) {
         }, 100);
 
     });
-    g.t('t2', function(cb) { cb(); });
+    g.t('t2', cb => cb());
     g.t('tt', ['t1', 't2']);
 
     g.run('tt', err => {
@@ -76,7 +76,7 @@ test('error in promise', function(t) {
             throw new Error('qwerty');
         });
     });
-    g.t('t2', function(cb) { cb(); });
+    g.t('t2', cb => cb());
     g.t('tt', ['t1', 't2']);
 
     g.run('tt', err => {

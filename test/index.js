@@ -8,6 +8,6 @@ var t = require('tape');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {
-        setImmediate(() => {console.error('\n' + ':o( !!! '.repeat(10)) });
+        setImmediate(() => { console.error('\n' + ':o( !!! '.repeat(10)) });
     }
 });

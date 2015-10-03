@@ -8,7 +8,7 @@ test('stress', function(t) {
 
     let count = 0;
 
-    let tf = (cb) => {
+    let tf = cb => {
         count++;
         cb();
     };
@@ -22,7 +22,7 @@ test('stress', function(t) {
 
     g.t('tt', ['t' + max]);
 
-    g.run('tt', (err) => {
+    g.run('tt', err => {
         t.is(count, max, 'count ' + max);
         t.end(err);
     });

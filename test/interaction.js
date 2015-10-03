@@ -9,13 +9,13 @@ test('promise', function(t) {
 
     let g = new G({log: msg => { } });
 
-    g.t('t1', function() {
-        return new Promise(function(s, f) {
+    g.t('t1', () => {
+        return new Promise((s, f) => {
             setTimeout(s, 100);
         });
     });
 
-    g.options.afterTaskRun = function() {
+    g.options.afterTaskRun = () => {
         t.pass();
         t.end();
     };
@@ -26,7 +26,7 @@ test('promise', function(t) {
 
 test('gulp', function(t){
     let g = new G({log: msg => { } });
-    g.t('t1', function() {
+    g.t('t1', () => {
         return gulp.src('./test/interaction.js')
             .pipe(through.obj((o, e, cb) => {
                 t.ok(o.path.endsWith('interaction.js'));
@@ -46,13 +46,13 @@ test('gulp', function(t){
 
 test('gulp handle', function(t){
     let g = new G({log: msg => { } });
-    g.t('t1', function(cb) {
+    g.t('t1', cb => {
         let s = gulp.src('./test/interaction.js')
             .pipe(through.obj((o, e, _cb) => {
                 t.ok(o.path.endsWith('interaction.js'));
                 _cb();
             }));
-        cb.onDone(s, () => { cb(); });
+        cb.onDone(s, () => cb());
     });
 
     g.options.afterTaskRun = function() {
@@ -74,6 +74,6 @@ test('gulp handle null', function(t){
         t.pass('after');
     };
 
-    g.run('t1', () => { t.end(); });
+    g.run('t1', () => t.end());
 
 });
