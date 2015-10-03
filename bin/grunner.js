@@ -10,10 +10,12 @@ let __ = require('async')
     , argv = require('yargs').usage('Usage: $0 [--gfile fileOrDir] [--gtask taskName] [--T] [--D] [--P] [--C] [--L timeMin] [--env.KEY="VALUE"]').argv
     ;
 
+console.log(`# NodeJs version: ${process.version}`);
+
 if(argv.env) {
     Object.keys(argv.env).forEach(e => {
         let info = process.env[e] ? ' (overwritten)' : '';
-        console.log('# Environment: ' + e + '=' + argv.env[e] + info);
+        console.log(`# Environment: ${e}=${argv.env[e]}${info}`);
         process.env[e] = argv.env[e];
     });
 }
