@@ -97,7 +97,7 @@ test('tool', function(t){
 
 test('external task', function(t){
 
-    let externalTask = (filePath) => {
+    let externalTask = filePath => {
         return cb => {
             gspawn({
                 cmd: 'node',
