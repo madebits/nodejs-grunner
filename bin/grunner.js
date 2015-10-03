@@ -8,9 +8,10 @@ let __ = require('async')
     , path = require('path')
     , rd = require('require-dir')
     , argv = require('yargs').usage('Usage: $0 [--gfile fileOrDir] [--gtask taskName] [--T] [--D] [--P] [--C] [--L timeMin] [--env.KEY="VALUE"]').argv
+    , gv = require('../package.json').version
     ;
 
-console.log(`# NodeJs version: ${process.version}`);
+console.log(`# NodeJs: ${process.version}, GRunner: ${gv}`);
 
 if(argv.env) {
     Object.keys(argv.env).forEach(e => {
