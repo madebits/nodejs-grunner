@@ -94,3 +94,23 @@ test('tool', function(t){
     g.run('t1', err => t.end(err));
 
 });
+
+test('external task', function(t){
+
+    let externalTask = (filePath) => {
+        return cb => {
+            gspawn({
+                cmd: 'node',
+                args: filePath,
+                resolveCmd: true,
+                logCall: true
+            }, cb);
+        };
+    };
+
+    let g = new G({log: msg => { } });
+    g.t('t1', externalTask('./test/test.js') );
+
+    g.run('t1', err => t.end(err));
+
+});
