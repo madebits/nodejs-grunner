@@ -3,7 +3,7 @@
 let test = require('tape');
 let G = require('../index').GRunner;
 
-test('stress', function(t) {
+test.skip('stress', function(t) {
     let g = new G({ log: () => {} });
 
     let count = 0;

@@ -5,7 +5,7 @@ require('require-dir')('./');
 
 let t = require('tape');
 
-//t.only('through pipe');
+//t.only('external task');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {

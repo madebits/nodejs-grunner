@@ -27,7 +27,7 @@ test('env loop', function(t) {
     t.end();
 });
 
-test('max life', function(t) {
+test.skip('max life', function(t) {
     let g = new G({log: msg => { } });
     t.plan(2);
 

@@ -11,7 +11,6 @@ test('error returned in cb', function(t) {
 
     g.t('t1', cb => {
         cb(new Error('qwerty-cb'));
-        cb();
     });
     g.t('t2', cb => cb());
     g.t('tt', ['t1', 't2']);
@@ -115,4 +114,21 @@ test('dependency cycle', function(t) {
         t.isNot(err, null, err.message);
         t.end();
     });
+});
+
+test('log', function(t) {
+    let util = require('util');
+
+    let g = new G();
+    g.options.name = 'G';
+
+    g.log('a\n\nbbd\n', null, 't1'); // trim last \n
+    g.log('a\nb\n\n', null, 't2');
+    try {
+        let t = a[4];
+    }
+    catch(e) {
+        g.log(e);
+    }
+    t.end();
 });

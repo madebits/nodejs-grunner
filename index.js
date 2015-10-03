@@ -3,6 +3,7 @@
 let __ = require('async')
     , Stream = require('stream').Stream
     , through = require('through2')
+    , util = require('util')
     ;
 
 function CircularDependencyError(value) {
@@ -174,8 +175,6 @@ class GRunner {
         };
         doneCb.ctx = ctx;
         doneCb.onDone = resHandler;
-        doneCb.startPipe = _this._startPipe;
-        doneCb.throughPipe = _this._throughPipe;
 
         if(_this.options.beforeTaskRun) _this.options.beforeTaskRun(ctx);
         let taskFun = (task.cb && !_this.options.dryRun) ? task.cb : cb => cb();
@@ -192,7 +191,7 @@ class GRunner {
         _this._handleResult(taskName, res, doneCb);
     }
 
-    _startPipe(o) {
+    startPipe(o) {
         let s = through.obj(function(obj, enc, cb) {
             cb(null, obj);
         });
@@ -210,7 +209,7 @@ class GRunner {
         return s;
     }
 
-    _throughPipe(eachFn, flushFn) {
+    throughPipe(eachFn, flushFn) {
         return through.obj(function(o, e, cb) {
             let _this = this;
             if(eachFn) {
@@ -228,15 +227,34 @@ class GRunner {
         });
     }
 
-    log(msg, isErr) {
+    _fixLine(line) {
+        if(!line) return '';
+        if (line.endsWith('\r\n')) line = line.substr(0, line.length - 2);
+        else if (line.endsWith('\n')) line = line.substr(0, line.length - 1);
+        return line;
+    }
+
+    log(msg, isErr, taskName) {
+        var _this = this;
         if(this.options.log) {
-            this.options.log(msg, isErr);
+            this.options.log(msg, isErr, taskName);
             return;
         }
+
+        if(!msg) msg = '';
+        const utilError = util.isError(msg);
         const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        let text = `[${date}] ${msg}`;
-        if(isErr) console.error(msg);
-        else console.log(text);
+        const prefix = `${_this.options.name ? _this.options.name : ''} [${date}] ${taskName ? `[${taskName}]` : ''}${(!!isErr || utilError) ? '!' : ''}`;
+
+        if(utilError) {
+            console.error(prefix, msg);
+        }
+        else {
+            _this._fixLine(msg.toString()).split('\n').forEach(line => {
+                if(isErr) console.error(prefix, _this._fixLine(line));
+                else console.log(prefix, _this._fixLine(line));
+            });
+        }
     }
 
     _isStr(s) {

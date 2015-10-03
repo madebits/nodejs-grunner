@@ -97,18 +97,20 @@ test('tool', function(t){
 
 test('external task', function(t){
 
+    let g = new G();
+
     let externalTask = filePath => {
         return cb => {
             gspawn({
                 cmd: 'node',
                 args: filePath,
                 resolveCmd: true,
-                logCall: true
+                logCall: true,
+                log: (data, source) => g.log(data, !(source % 2), cb.ctx.taskName),
             }, cb);
         };
     };
 
-    let g = new G({log: msg => { } });
     g.t('t1', externalTask('./test/test.js') );
 
     g.run('t1', err => t.end(err));
@@ -129,7 +131,7 @@ test('start pipe', function(t) {
     let res = [];
 
     g.t('tt', cb => {
-        return cb.startPipe(sequence()).pipe(through.obj((o, e, _cb) => {
+        return g.startPipe(sequence()).pipe(through.obj((o, e, _cb) => {
             res.push(o);
             _cb();
         }));
@@ -151,7 +153,7 @@ test('start pipe null', function(t) {
     let res = [];
 
     g.t('tt', cb => {
-        return cb.startPipe().pipe(through.obj((o, e, _cb) => {
+        return g.startPipe().pipe(through.obj((o, e, _cb) => {
             res.push(o);
             _cb();
         }));
@@ -178,7 +180,7 @@ test('through pipe', function(t) {
     let res2 = [];
 
     g.t('tt', cb => {
-        return cb.startPipe(sequence()).pipe(cb.throughPipe((o, cbFn) => {
+        return g.startPipe(sequence()).pipe(g.throughPipe((o, cbFn) => {
             res.push(o);
             console.log(o);
             cbFn.push(res.length);

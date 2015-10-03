@@ -11,12 +11,12 @@ let __ = require('async')
     , gv = require('../package.json').version
     ;
 
-console.log(`# NodeJs: ${process.version}, GRunner: ${gv}`);
+G.log(`# NodeJs: ${process.version}, GRunner: ${gv}`);
 
 if(argv.env) {
     Object.keys(argv.env).forEach(e => {
         let info = process.env[e] ? ' (overwritten)' : '';
-        console.log(`# Environment: ${e}=${argv.env[e]}${info}`);
+        G.log(`# Environment: ${e}=${argv.env[e]}${info}`);
         process.env[e] = argv.env[e];
     });
 }
@@ -34,22 +34,22 @@ paths.forEach(f => {
     try {
         let stat = fs.lstatSync(p);
         if(stat.isDirectory()) {
-            console.log(`# Dir: ${p}`);
+            G.log(`# Dir: ${p}`);
             rd(p, { recurse: true });
         }
         else if(stat.isFile()) {
-            console.log(`# File: ${p}`);
+            G.log(`# File: ${p}`);
             require(p);
         }
         else throw new Error('Not a valid file or folder: ' + f);
-    }catch(e) {
-        console.error(e.message);
+    } catch(e) {
+        G.log(e);
         process.exit(1);
     }
 });
 
 let ts = taskName.map(t => (__cb) => {
-    console.log(`# Task: ${argv.P ? '| ' : ''}${t}`);
+    G.log(`# Task: ${argv.P ? '| ' : ''}${t}`);
     G.run(t, __cb);
 });
 
@@ -60,7 +60,7 @@ if(argv.T) {
 
 let done = err => {
     if(err) process.exit(1);
-    console.log('# Done');
+    G.log('# Done');
 };
 
 if(argv.P) { __.parallel(ts, done); }
