@@ -11,7 +11,7 @@ test('env', function(t) {
     process.env['K3'] = 'V3[[K2]]';
     process.env['K4'] = 'V4[[K3]][[K1]]V4';
 
-    t.is(g.envResolve('K4'), 'V4V3V2V1V4');
+    t.is(g.env('K4'), 'V4V3V2V1V4');
     t.end();
 });
 
@@ -22,7 +22,7 @@ test('env loop', function(t) {
     process.env['K2'] = 'V2[[K1]]';
 
     t.throws(() => {
-        g.envResolve('K2');
+        g.env('K2');
     }, /RangeError/);
     t.end();
 });

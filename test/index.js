@@ -5,7 +5,7 @@ require('require-dir')('./');
 
 let t = require('tape');
 
-//t.only('external task');
+//t.only('file write');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {

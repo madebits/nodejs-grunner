@@ -3,3 +3,4 @@ npm-debug.log
 .npmrc
 .git/
 .Rhistory
+temp/
