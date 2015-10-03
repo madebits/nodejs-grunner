@@ -468,7 +468,12 @@ class GRunner {
                             let fpath = path.resolve(itemPath);
                             let rpath = fpath.substr(entryDir.length);
                             if(rpath.startsWith('/') || rpath.startsWith('\\')) rpath = rpath.substr(1);
-                            let obj = ({dir: entryDir, path: fpath, name: items[i], ext: path.extname(items[i]) || '', relative: rpath, stats: stat });
+                            let obj = ({dir: entryDir,
+                                path: fpath,
+                                name: items[i],
+                                ext: path.extname(items[i]) || '',
+                                relative: rpath,
+                                stats: stat });
                             if (!filter || filter(obj)) {
                                 add(obj);
                             }
