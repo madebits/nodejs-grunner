@@ -3,7 +3,7 @@
 "use strict";
 
 let G = require('./../lib/GRunner')
-    , argv = require('yargs').usage('Usage: $0 [--gdir dir] [--gdirrec dir] [--gfile path] [--gtask taskName] [--T] [--D] [--P]').argv
+    , argv = require('yargs').usage('Usage: $0 [--gdir dir] [--gdirrec dir] [--gfile path] [--gtask taskName] [--T] [--D] [--P] [--C]').argv
     , path = require('path')
     , rd = require('require-dir')
     , __ = require('async')
@@ -40,6 +40,10 @@ if(argv.T) {
 
 if(argv.D) {
     G.options.dryRun = true;
+}
+
+if(argv.C) {
+    G.options.noLoopDetection = true;
 }
 
 let ts = taskName.map(t => (__cb) => {
