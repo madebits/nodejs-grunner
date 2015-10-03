@@ -3,7 +3,7 @@
 let test = require('tape');
 let G = require('../lib/GRunner').GRunner;
 let gulp = require('gulp');
-let throught = require('through2');
+let through = require('through2');
 
 test('error returned in cb', function(t) {
 
@@ -40,7 +40,7 @@ test('error thrown', function(t) {
 
 });
 
-test('error asyncn', function(t) {
+test('error async', function(t) {
 
     let g = new G({ log: msg => { } });
 
@@ -92,7 +92,7 @@ test('error in pipe', function(t) {
 
     g.t('t1', function() {
         return gulp.src('./test/interaction.js')
-            .pipe(throught.obj((o, e, cb) => {
+            .pipe(through.obj((o, e, cb) => {
                 cb(new Error('qwerty'));
             }));
     });

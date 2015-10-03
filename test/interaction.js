@@ -3,7 +3,7 @@
 let test = require('tape');
 let G = require('../lib/GRunner').GRunner;
 let gulp = require('gulp');
-let throught = require('through2');
+let through = require('through2');
 
 test('promise', function(t) {
 
@@ -28,7 +28,7 @@ test('gulp', function(t){
     let g = new G({log: msg => { } });
     g.t('t1', function() {
         return gulp.src('./test/interaction.js')
-            .pipe(throught.obj((o, e, cb) => {
+            .pipe(through.obj((o, e, cb) => {
                 t.ok(o.path.endsWith('interaction.js'));
             cb();
         }));
@@ -48,7 +48,7 @@ test('gulp handle', function(t){
     let g = new G({log: msg => { } });
     g.t('t1', function(cb, ctx) {
         let s = gulp.src('./test/interaction.js')
-            .pipe(throught.obj((o, e, _cb) => {
+            .pipe(through.obj((o, e, _cb) => {
                 t.ok(o.path.endsWith('interaction.js'));
                 _cb();
             }));
