@@ -127,7 +127,7 @@ test('dynamic dep', function(t) {
     g.run('tt', t.end);
 });
 
-test('dynamic task', function(t) {
+test('dynamic task', t => {
     let g = new G({ log: () => {} }); //
     t.plan(1);
     g.t('t1', cb => {
@@ -143,7 +143,22 @@ test('dynamic task', function(t) {
     g.run('tt', t.end);
 });
 
-test('run', function(t) {
+
+test('null dep', t => {
+    let F = false;
+    t.plan(1);
+    let g = new G({});
+    g.t('t1');
+    g.t('t2', [null, 't1', '']);
+    g.t('t3', [ [null, null], 't2', null, 't1', F ? 'aaa' : null]);
+    g.run('t3', () => {
+        t.pass();
+        t.end();
+    });
+});
+
+
+test('run', t => {
     let g = new G({ log: () => {} }); //
     t.plan(1);
     g.t('t1', cb => {

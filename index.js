@@ -54,10 +54,10 @@ class GRunner {
             return serFun;
         }
         ctx = _this._incCtx(ctx, 's');
-        let depFun = dependencies.map(d => {
+        let depFun = dependencies.filter(d => !!d).map(d => {
             if(Array.isArray(d)) {
                 return __cb => {
-                    let f = d.map(pd => {
+                    let f = d.filter(pd => !!pd).map(pd => {
                         return __cb => {
                             if(Array.isArray(pd)) {
                                 let nestedSerFun = _this._depMap(pd, ctx, stack);
