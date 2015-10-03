@@ -19,6 +19,7 @@ class GRunner {
     constructor(options) {
         this.options = options || {};
         this.tasks = {};
+        this.lifeTimer = null;
     }
 
     _cloneCtx(ctx) {
@@ -249,7 +250,46 @@ class GRunner {
         l(`# Total ${keys.length} task(s) : ${totalLines} line(s)`);
     }
 
-}
+    _parseVars(str, handler) {
+        function process(s) {
+            if(!s) return s;
+            return s.replace(/\[\[(.+?)\]\]/g, function(m, e){
+                let v = handler(e);
+                return v ? process(v) : '';
+            });
+        }
+        return process(str);
+    }
+
+    envResolveValue(value) {
+        return this._parseVars(value, e => process.env[e]);
+    }
+
+    envResolve(e) {
+        return this.envResolveValue(process.env[e]);
+    }
+
+    setProcessMaxLifeTime(timeInMinutes, cb) {
+        let _this = this;
+        if(_this.lifeTimer) {
+            clearTimeout(_this.lifeTimer);
+            _this.log('Maximum process life timer off!');
+        }
+        if(timeInMinutes <= 0) return;
+        _this.log(`Maximum process life timer: ${timeInMinutes} minute(s)!`);
+        _this.lifeTimer = setTimeout(function() {
+            if(cb) {
+                cb();
+            }
+            else {
+                _this.log(`Maximum process life time of ${timeInMinutes} minute(s) reached. Terminating ...!`);
+                process.exit(1);
+            }
+        }, timeInMinutes * 60 * 1000);
+        _this.lifeTimer.unref();
+    }
+
+} //EOC
 
 if(!GLOBAL.CCA2AB34EC9C4040A54324D4348540E7) {
     let g = new GRunner(); // per process

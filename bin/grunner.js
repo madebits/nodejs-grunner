@@ -7,11 +7,20 @@ let __ = require('async')
     , fs = require('fs')
     , path = require('path')
     , rd = require('require-dir')
-    , argv = require('yargs').usage('Usage: $0 [--gfile fileOrDir] [--gtask taskName] [--T] [--D] [--P] [--C]').argv
+    , argv = require('yargs').usage('Usage: $0 [--gfile fileOrDir] [--gtask taskName] [--T] [--D] [--P] [--C] [--L timeMin] [--env.KEY="VALUE"]').argv
     ;
+
+if(argv.env) {
+    Object.keys(argv.env).forEach(e => {
+        let info = process.env[e] ? ' (overwritten)' : '';
+        console.log('# Environment: ' + e + '=' + argv.env[e] + info);
+        process.env[e] = argv.env[e];
+    });
+}
 
 G.options.dryRun = !!argv.D;
 G.options.noLoopDetection = !!argv.C;
+if(argv.L) G.setProcessMaxLifeTime(argv.L);
 
 let paths = G._toArray(argv.gfile || './gfile.js')
     , taskName = G._toArray(argv.gtask || 'default')

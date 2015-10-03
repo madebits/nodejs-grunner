@@ -5,6 +5,8 @@ require('require-dir')('./');
 
 let t = require('tape');
 
+//t.only('max life');
+
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {
         setImmediate(() => { console.error('\n' + ':o( !!! '.repeat(10)) });
