@@ -181,7 +181,7 @@ test('run once', t => {
                 return;
             }
             cb.ctx.task.once = true;
-            cb.ctx.runner.log(`@Once: ${cb.ctx.taskName}`, false, cb.ctx.taskName);
+            cb.ctx.runner.log('@once', false, cb.ctx.taskName);
             return ucb(cb);
         };
     };
