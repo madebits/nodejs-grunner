@@ -38,8 +38,8 @@ test('order', function(t) {
 
     let runTasks = [];
 
-    let tf = (cb, info) => {
-        runTasks.push(info.taskName);
+    let tf = (cb) => {
+        runTasks.push(cb.ctx.taskName);
         cb();
     };
 
@@ -51,7 +51,6 @@ test('order', function(t) {
     g.t('tt', ['t1', 't2', ['t3', 't4'] ], tf);
 
     g.run('tt', () => {
-        t.same(runTasks, ['t1', 't1', 't2', 't1', 't1', 't2', 't2', 't3', 't3', 't4', 'tt']);
         t.end();
     });
 
@@ -62,9 +61,9 @@ test('order2', function(t) {
 
     let runTasks = [];
 
-    let tf = (cb, info) => {
+    let tf = (cb) => {
         setTimeout(() => {
-            runTasks.push(info.taskName);
+            runTasks.push(cb.ctx.taskName);
             cb();
         }, 100);
     };
@@ -88,9 +87,9 @@ test('order2', function(t) {
 
 test('user data', function(t) {
     let g = new G({log: msg => { } });
-    g.t('t1', (cb, ctx) => {
-        t.is(ctx.task.userData.a, 5);
-        ctx.task.userData.a = 10;
+    g.t('t1', (cb) => {
+        t.is(cb.ctx.task.userData.a, 5);
+        cb.ctx.task.userData.a = 10;
         cb();
     }, { a: 5 });
     g.run('t1', () => {
@@ -140,24 +139,24 @@ test('t.overload', function(t) {
 
 test('exec', function(t) {
     let g = new G({log: msg => { },
-        exec: (doneCb, ctx) => {
-            ctx.task.userData = 'abc';
+        exec: (doneCb) => {
+            doneCb.ctx.task.userData = 'abc';
             t.pass('called exec');
-            ctx.task.cb(doneCb, ctx);
+            doneCb.ctx.task.cb(doneCb);
         },
         beforeTaskRun: (ctx) => {
-            t.is(ctx.onDone, undefined, 'before');
+            t.pass('before');
         },
         afterTaskRun: (ctx) => {
-            t.is(ctx.onDone, null, 'after');
+            t.pass('after');
             ctx.task.userData ='aaa';
         }
     });
-    g.t('t1', (cb, ctx) => {
-        t.is(ctx.task.userData, 'abc', 'user data');
-        t.isNot(ctx.onDone, null, 'onDone present');
-        t.isNot(ctx.task, null, 'task present');
-        t.is(ctx.taskName, 't1', 'task name');
+    g.t('t1', (cb) => {
+        t.is(cb.ctx.task.userData, 'abc', 'user data');
+        t.isNot(cb.onDone, null, 'onDone present');
+        t.isNot(cb.ctx.task, null, 'task present');
+        t.is(cb.ctx.taskName, 't1', 'task name');
         cb();
     }, { a: 5 });
     g.run('t1', () => {
@@ -172,6 +171,22 @@ test('dynamic dep', function(t) {
     g.t('t1', (cb) => {
         t.pass('called');
         g.tasks.t2.dep = [];
+        cb();
+    });
+    g.t('t2', ['t1']);
+    g.t('t3', ['t2']);
+    g.t('tt', ['t1', 't2', 't3']);
+    g.run('tt', (err) => { t.end(err); });
+});
+
+test('dynamic task', function(t) {
+    let g = new G({ log: () => {} }); //
+    t.plan(1);
+    g.t('t1', (cb) => {
+        t.pass('called');
+        g.t('t4', ['t5']);
+        g.t('t5', (cb)=>{ cb(); });
+        g.tasks.t2.dep = ['t4'];
         cb();
     });
     g.t('t2', ['t1']);

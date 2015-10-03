@@ -46,13 +46,13 @@ test('gulp', function(t){
 
 test('gulp handle', function(t){
     let g = new G({log: msg => { } });
-    g.t('t1', function(cb, ctx) {
+    g.t('t1', function(cb) {
         let s = gulp.src('./test/interaction.js')
             .pipe(through.obj((o, e, _cb) => {
                 t.ok(o.path.endsWith('interaction.js'));
                 _cb();
             }));
-        ctx.onDone(s, cb);
+        cb.onDone(s, () => { cb(); });
     });
 
     g.options.afterTaskRun = function() {
@@ -66,8 +66,8 @@ test('gulp handle', function(t){
 
 test('gulp handle null', function(t){
     let g = new G({log: msg => { } });
-    g.t('t1', function(cb, ctx) {
-        ctx.onDone(null, cb);
+    g.t('t1', function(cb) {
+        cb.onDone();
     });
 
     g.options.afterTaskRun = function() {

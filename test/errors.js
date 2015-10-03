@@ -107,12 +107,13 @@ test('error in pipe', function(t) {
 });
 
 test('dependency cycle', function(t) {
-    let g = new G({ log: msg => { } });
+    let g = new G({  }); //log: msg => { }
     g.t('t1', ['t2']);
-    g.t('t2', ['t1']);
+    g.t('t2', ['t3']);
+    g.t('t3', ['t1']);
     g.t('tt', ['t2']);
     g.run('tt', err => {
-        t.true(err instanceof RangeError);
+        t.isNot(err, null, err.message);
         t.end();
     });
 });

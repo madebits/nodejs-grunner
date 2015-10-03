@@ -4,7 +4,7 @@ require('require-dir')('./');
 
 var t = require('tape');
 
-//t.only('dynamic dep');
+//t.only('dependency cycle');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {
