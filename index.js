@@ -211,7 +211,8 @@ class GRunner {
         if(!msg) msg = '';
         const utilError = util.isError(msg);
         const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        const prefix = `${_this.options.name ? _this.options.name : ''} [${date}] ${taskName ? `[${taskName}]` : ''}${(!!isErr || utilError) ? '!' : ''}`;
+        const prefix = `${_this.options.name
+            ? _this.options.name : ''} [${date}] ${taskName ? `[${taskName}]` : ''}${(!!isErr || utilError) ? '!' : ''}`;
 
         if(utilError) {
             console.error(prefix, msg);
