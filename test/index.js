@@ -1,4 +1,5 @@
-require('./basic');
-require('./interaction');
-require('./errors');
+require('require-dir')('./');
+//require('./basic');
+//require('./interaction');
+//require('./errors');
 
