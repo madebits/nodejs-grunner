@@ -457,7 +457,7 @@ class GRunner {
                     try {
                         let stat = fs.statSync(itemPath);
                         if (stat.isFile()) {
-                            let obj = ({dir, file: path.resolve(itemPath), name: items[i], ext: path.extname(items[i]) });
+                            let obj = ({dir, file: path.resolve(itemPath), name: items[i], ext: path.extname(items[i]) || '' });
                             if (!filter || filter(obj)) {
                                 s.write(obj);
                             }
