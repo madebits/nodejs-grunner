@@ -6,6 +6,7 @@ let G = require('./../lib/GRunner')
     , argv = require('yargs').usage('Usage: $0 [--gdir dir] [--gdirrec dir] [--gfile path] [--gtask taskName] [--T] [--D]').argv
     , path = require('path')
     , rd = require('require-dir')
+    , __ = require('async')
     ;
 
 let dirName = G._toArray(argv.gdir);
@@ -40,9 +41,13 @@ if(argv.D) {
     G.options.dryRun = true;
 }
 
-taskName.forEach(t => {
-    G.run(taskName, err => {
-        if(err) process.exit(1);
-        else process.exit(0);
-    });
+var ts = taskName.map(t => (__cb) => {
+    console.log(`Task: ${t}`);
+    G.run(t, err => { __cb(err); });
 });
+
+__.series(ts, (err) => {
+    if(err) process.exit(1);
+    else process.exit(0);
+});
+
