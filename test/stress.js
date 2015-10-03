@@ -10,6 +10,7 @@ test('stress', function(t) {
 
     let tf = cb => {
         count++;
+        if((count % 1000) === 0) process.stdout.write('.');
         cb();
     };
 
