@@ -191,7 +191,7 @@ class GRunner {
         _this._handleResult(taskName, res, doneCb);
     }
 
-    startPipe(o) {
+    pipeStart(o) {
         let s = through.obj(function(obj, enc, cb) {
             cb(null, obj);
         });
@@ -209,7 +209,7 @@ class GRunner {
         return s;
     }
 
-    throughPipe(eachFn, flushFn) {
+    pipeThrough(eachFn, flushFn) {
         return through.obj(function(o, e, cb) {
             let _this = this;
             if(eachFn) {
