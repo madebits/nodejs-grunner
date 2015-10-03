@@ -174,7 +174,7 @@ test('run', t => {
 
 test('run once', t => {
 
-    let once = (ucb) => {
+    const once = (ucb) => {
         return cb => {
             if(cb.ctx.task.once) {
                 cb();
