@@ -5,7 +5,7 @@ require('require-dir')('./');
 
 let t = require('tape');
 
-//t.only('files');
+//t.only('files rec2');
 
 t.onFinish(function () {
     if(t.getHarness()._results.fail) {
