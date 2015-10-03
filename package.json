@@ -1,6 +1,6 @@
 {
   "name": "grunner",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "GRunner is a task runner for Node.js compatible with Gulp plugins",
   "main": "./lib/GRunner.js",
   "scripts": {

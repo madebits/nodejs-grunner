@@ -19,20 +19,26 @@ let paths = G._toArray(argv.gfile || './gfile.js')
 
 paths.forEach(f => {
     let p = path.resolve(f);
-    let stat = fs.lstatSync(p);
-    if(stat.isDirectory()) {
-        console.log(`Dir: ${p}`);
-        rd(p, { recurse: true });
-    }
-    else if(stat.isFile()) {
-        console.log(`File: ${p}`);
-        require(p);
+    try {
+        let stat = fs.lstatSync(p);
+        if(stat.isDirectory()) {
+            console.log(`# Dir: ${p}`);
+            rd(p, { recurse: true });
+        }
+        else if(stat.isFile()) {
+            console.log(`# File: ${p}`);
+            require(p);
+        }
+        else throw new Error('Not a valid file or folder: ' + f);
+    }catch(e) {
+        console.error(e.message);
+        process.exit(1);
     }
 });
 
 let ts = taskName.map(t => (__cb) => {
-    console.log(`Task: ${argv.P ? '| ' : ''}${t}`);
-    G.run(t, err => { __cb(err); });
+    console.log(`# Task: ${argv.P ? '| ' : ''}${t}`);
+    G.run(t, __cb);
 });
 
 if(argv.T) {
@@ -42,7 +48,7 @@ if(argv.T) {
 
 let done = err => {
     if(err) process.exit(1);
-    else process.exit(0);
+    console.log('# Done');
 };
 
 if(argv.P) { __.parallel(ts, done); }
