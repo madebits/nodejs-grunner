@@ -64,3 +64,16 @@ test('gulp handle', function(t){
 
 });
 
+test('gulp handle null', function(t){
+    let g = new G({log: msg => { } });
+    g.t('t1', function(cb, ctx) {
+        ctx.onDone(null, cb);
+    });
+
+    g.options.afterTaskRun = function() {
+        t.pass('after');
+    };
+
+    g.run('t1', () => { t.end(); });
+
+});

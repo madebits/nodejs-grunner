@@ -79,7 +79,7 @@ test('order2', function(t) {
 
     g.t('tt', [['t1', 't2', 't3', 't4']], tf);
 
-    g.run('tt', (err) => {
+    g.run('tt', () => {
         console.log(runTasks);
         t.end();
     });
@@ -164,4 +164,18 @@ test('exec', function(t) {
         t.is(g.tasks['t1'].userData, 'aaa', 'done user data');
         t.end();
     });
+});
+
+test('dynamic dep', function(t) {
+    let g = new G({ log: () =>{} });
+    t.plan(1);
+    g.t('t1', (cb) => {
+        t.pass('called');
+        g.tasks.t2.dep = [];
+        cb();
+    });
+    g.t('t2', ['t1']);
+    g.t('t3', ['t2']);
+    g.t('tt', ['t1', 't2', 't3']);
+    g.run('tt', (err) => { t.end(err); });
 });
