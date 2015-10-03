@@ -416,36 +416,44 @@ class GRunner {
     files(dir, recursive, filter) {
         let count = 0;
         let error = false;
+        let filesCount = 0;
 
         let s = through.obj(function(file, enc, cb) {
             cb(null, file);
         });
 
-        let onError = function (e) {
-            error = true;
-            s.emit('error', e);
+        let onDone = function (e) {
+            if(e) {
+                error = true;
+                s.emit('error', e);
+            }
             s.end();
         };
 
         let add = function(file) {
             if(!error) {
-                s.add(file);
+                file.count = ++filesCount;
+                s.write(file);
             }
         };
 
-        let process = function(_dir) {
+        let scan = function(entryDir, dir, doneCb) {
             count++;
 
-            let done = function() {
+            let done = function(err) {
+                if(err) {
+                    doneCb(err);
+                    return;
+                }
                 count--;
                 if(!error && (count === 0)) {
-                    s.end();
+                   doneCb();
                 }
             };
 
-            fs.readdir(_dir, function(err, items) {
+            fs.readdir(dir, function(err, items) {
                 if(err) {
-                    onError(err);
+                    done(err);
                     return;
                 }
                 let dirs = [];
@@ -453,50 +461,65 @@ class GRunner {
 
                 for (let i = 0; i < items.length; i++) {
                     if(error) break;
-                    let itemPath = path.join(_dir, items[i]);
+                    let itemPath = path.join(dir, items[i]);
                     try {
                         let stat = fs.statSync(itemPath);
                         if (stat.isFile()) {
-                            let obj = ({dir, file: path.resolve(itemPath), name: items[i], ext: path.extname(items[i]) || '' });
+                            let fpath = path.resolve(itemPath);
+                            let rpath = fpath.substr(entryDir.length);
+                            if(rpath.startsWith('/') || rpath.startsWith('\\')) rpath = rpath.substr(1);
+                            let obj = ({dir: entryDir, path: fpath, name: items[i], ext: path.extname(items[i]) || '', relative: rpath, size: stat.size });
                             if (!filter || filter(obj)) {
-                                s.write(obj);
+                                add(obj);
                             }
                         }
                         else if (stat.isDirectory()) {
                             dirs.push(itemPath);
                         }
                     } catch (e) {
-                        onError(e);
+                        done(e);
+                        break;
                     }
                 }
 
                 if(recursive) {
-                    let next = dirs.map(d => _cb => {
+                    let next = dirs.map(d => __cb => {
                         setTimeout(function() {
-                            process(d);
-                            _cb();
+                            scan(entryDir, d, doneCb);
+                            __cb();
                         }, 0);
                     });
                     __.series(next, (err) => {
-                        if(err) onError(err);
-                        done();
+                        done(err);
                     });
                 }
                 else {
-                    done();
+                    process.nextTick(done);
                 }
             });
 
         };
 
         if(dir) {
-            dir = path.resolve(dir);
-            setTimeout(function () {
-                process(dir);
-            }, 0);
+            var dirs = this._toArray(dir).map(d => __cb => {
+                d = path.resolve(d);
+                scan(d, d, function(err) {
+                    __cb(err);
+                });
+            });
+            if(dirs.length) {
+                setTimeout(function () {
+                    __.series(dirs, function (err) {
+                        onDone(err);
+                    });
+                }, 0);
+            }
+            else {
+                onDone();
+            }
         }
         else {
-            s.end();
+            onDone();
         }
 
         return s;

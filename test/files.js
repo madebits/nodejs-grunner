@@ -12,9 +12,9 @@ test('files', t => {
         files.push(f);
         cb();
     }, cb => {
-        t.ok(files[0].file.endsWith('a.js'));
-        t.ok(files[1].file.endsWith('a.txt'));
-        t.ok(files[2].file.endsWith('b.txt'));
+        t.ok(files[0].path.endsWith('a.json'));
+        t.ok(files[1].path.endsWith('a.txt'));
+        t.ok(files[2].path.endsWith('b.txt'));
         t.end();
         cb();
     }));
@@ -26,10 +26,31 @@ test('files rec', t => {
 
     let files = [];
     g.files('./test/files', true).pipe(g.pipeThrough((f, cb) => {
+        console.log(f);
         files.push(f.name);
         cb();
     }, cb => {
-        t.ok(files.indexOf('a.js') >= 0);
+        t.ok(files.indexOf('a.json') >= 0);
+        t.ok(files.indexOf('d11.txt') >= 0);
+        t.ok(files.indexOf('d21.txt') >= 0);
+        t.end();
+        cb();
+    }));
+});
+
+test('files rec2', t => {
+    t.plan(3);
+    let g = new G({ });
+
+    let files = [];
+    g.files(['./test/files/d1', './test/files/d2'], true)
+        .on('error', err => console.error(err))
+        .pipe(g.pipeThrough((f, cb) => {
+        console.log(f);
+        files.push(f.name);
+        cb();
+    }, cb => {
+        t.ok(files.indexOf('a.json') < 0);
         t.ok(files.indexOf('d11.txt') >= 0);
         t.ok(files.indexOf('d21.txt') >= 0);
         t.end();
@@ -43,13 +64,13 @@ test('files filter', t => {
 
     let files = [];
     g.files('./test/files', true, file => {
-        return (file.file.toLowerCase().endsWith('.js'));
+        return (file.path.toLowerCase().endsWith('.json'));
     }).pipe(g.pipeThrough((f, cb) => {
         files.push(f.name);
         cb();
     }, cb => {
-        t.ok(files.indexOf('a.js') >= 0);
-        t.ok(files.indexOf('d21.js') >= 0);
+        t.ok(files.indexOf('a.json') >= 0);
+        t.ok(files.indexOf('d21.json') >= 0);
         t.ok(files.indexOf('a.txt') < 0);
         t.end();
         cb();
@@ -94,7 +115,7 @@ test('file read', t => {
     t.is(d.toString('utf8'), 'ABC');
     d = g.fileReadTxt('./test/files/a.txt');
     t.is(d, 'ABC');
-    d = g.fileReadJson('./test/files/a.js', true);
+    d = g.fileReadJson('./test/files/a.json', true);
     t.is(d.a, 'ABC');
     t.end();
 });
@@ -102,8 +123,8 @@ test('file read', t => {
 test('file write', t => {
     let g = new G({ });
 
-    g.fileWriteJson('./test/temp/a.js', {a: 5, b: 'ABC'});
-    let d = g.fileReadJson('./test/temp/a.js', true);
+    g.fileWriteJson('./test/temp/a.json', {a: 5, b: 'ABC'});
+    let d = g.fileReadJson('./test/temp/a.json', true);
     t.is(d.a, 5);
 
     g.rm('./test/temp');
