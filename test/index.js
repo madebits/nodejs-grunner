@@ -1,7 +1,7 @@
 "use strict";
 
-//require('require-dir')('./');
-require('./wf.js');
+require('require-dir')('./');
+//require('./wf.js');
 
 let t = require('tape');
 
