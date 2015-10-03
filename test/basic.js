@@ -139,15 +139,29 @@ test('t.overload', function(t) {
 });
 
 test('exec', function(t) {
-    t.plan(3);
-    let g = new G({log: msg => { }, exec: (doneCb, ctx) => {
-        ctx.task.userData = 'abc';
-        t.pass();
-        ctx.task.cb(doneCb, ctx);
-    } });
+    let g = new G({log: msg => { },
+        exec: (doneCb, ctx) => {
+            ctx.task.userData = 'abc';
+            t.pass('called exec');
+            ctx.task.cb(doneCb, ctx);
+        },
+        beforeTaskRun: (ctx) => {
+            t.is(ctx.onDone, undefined, 'before');
+        },
+        afterTaskRun: (ctx) => {
+            t.is(ctx.onDone, null, 'after');
+            ctx.task.userData ='aaa';
+        }
+    });
     g.t('t1', (cb, ctx) => {
-        t.is(ctx.task.userData, 'abc');
-        t.pass();
+        t.is(ctx.task.userData, 'abc', 'user data');
+        t.isNot(ctx.onDone, null, 'onDone present');
+        t.isNot(ctx.task, null, 'task present');
+        t.is(ctx.taskName, 't1', 'task name');
+        cb();
     }, { a: 5 });
-    g.run('t1');
+    g.run('t1', () => {
+        t.is(g.tasks['t1'].userData, 'aaa', 'done user data');
+        t.end();
+    });
 });
