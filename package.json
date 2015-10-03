@@ -2,7 +2,7 @@
   "name": "grunner",
   "version": "0.0.1",
   "description": "GRunner is a task runner for Node.js compatible with Gulp plugins",
-  "main": "./index.js",
+  "main": "./bin/index.js",
   "scripts": {
     "test": "node ./test/index.js",
     "push": "node -p \"new Date().toISOString();\" && npm publish ./"
