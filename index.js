@@ -107,7 +107,7 @@ class GRunner {
                 }
                 cb(err);
             });
-        }, 0);
+        });
     }
 
     run(taskName, cb) {
