@@ -1,12 +1,10 @@
-"use strict";
+'use strict';
 
 let __ = require('async')
     , Stream = require('stream').Stream
     , through = require('through2')
     , util = require('util')
-    , fs = require('fs')
-    , path = require('path')
-    , mkdirp = require('mkdirp')
+    , GUtils = require('./lib/gutils')
     ;
 
 function CircularDependencyError(value) {
@@ -38,18 +36,10 @@ class GRunner {
         return ctx;
     }
 
-    _toArray(o) {
-        if(!o) return [];
-        if(!Array.isArray(o)) {
-            o = [ o ];
-        }
-        return o;
-    }
-
     _depMap(dependencies, ctx, stack) {
         let _this = this;
         let serFun = [];
-        dependencies = _this._toArray(dependencies);
+        dependencies = GUtils.toArray(dependencies);
         if(!dependencies.length) {
             return serFun;
         }
@@ -194,13 +184,6 @@ class GRunner {
         _this._handleResult(taskName, res, doneCb);
     }
 
-    _fixLine(line) {
-        if(!line) return '';
-        if (line.endsWith('\r\n')) line = line.substr(0, line.length - 2);
-        else if (line.endsWith('\n')) line = line.substr(0, line.length - 1);
-        return line;
-    }
-
     log(msg, isErr, taskName) {
         let _this = this;
         if(this.options.log) {
@@ -218,19 +201,15 @@ class GRunner {
             console.error(prefix, msg);
         }
         else {
-            _this._fixLine(msg.toString()).split('\n').forEach(line => {
-                if(isErr) console.error(prefix, _this._fixLine(line));
-                else console.log(prefix, _this._fixLine(line));
+            GUtils.fixLine(msg.toString()).split('\n').forEach(line => {
+                if(isErr) console.error(prefix, GUtils.fixLine(line));
+                else console.log(prefix, GUtils.fixLine(line));
             });
         }
     }
 
-    _isStr(s) {
-        return !!s && ((typeof s === 'string') || (s instanceof String));
-    }
-
     addTask(taskName, taskDependencies, taskFun, userData) {
-        if(!this._isStr(taskName)) throw new Error('taskName required string');
+        if(!GUtils.isStr(taskName)) throw new Error('taskName required string');
         let setNull = o => { if(o === undefined) { o = null; } return o; };
         taskDependencies = setNull(taskDependencies);
         taskFun = setNull(taskFun);
@@ -247,7 +226,7 @@ class GRunner {
         }
 
         if(!!tf && (typeof tf !== 'function')) throw new Error('taskFun must be a function');
-        this.tasks[taskName] = { dep: this._toArray(td), cb: tf, userData: tu };
+        this.tasks[taskName] = { dep: GUtils.toArray(td), cb: tf, userData: tu };
     }
 
     t(taskName, taskDependencies, taskFun, taskData) {
@@ -277,56 +256,15 @@ class GRunner {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     pipeStart(o) {
-        let s = through.obj(function(obj, enc, cb) {
-            cb(null, obj);
-        });
-        if(o) {
-            for(let x of o) {
-                let temp = x;
-                process.nextTick(function() {
-                    s.write(temp);
-                });
-            }
-        }
-        process.nextTick(function() {
-            s.end();
-        });
-        return s;
+        return GUtils.pipeStart(o);
     }
 
     pipeThrough(eachFn, flushFn) {
-        return through.obj(function(o, e, cb) {
-            let _this = this;
-            if(eachFn) {
-                cb.push = _this.push.bind(_this);
-                eachFn(o, cb);
-            }
-            else cb();
-        }, function(cb) {
-            let _this = this;
-            if(flushFn) {
-                cb.push = _this.push.bind(_this);
-                flushFn(cb);
-            }
-            else cb();
-        });
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    _parseVars(str, handler) {
-        function process(s) {
-            if(!s) return '';
-            return s.replace(/\[\[(.+?)\]\]/g, function(m, e){
-                let v = handler(e);
-                return v ? process(v) : '';
-            });
-        }
-        return process(str);
+        return GUtils.pipeThrough(eachFn, flushFn);
     }
 
     envValue(value) {
-        return this._parseVars(value, e => process.env[e]);
+        return GUtils.parseVars(value, e => process.env[e]);
     }
 
     env(e) {
@@ -355,36 +293,12 @@ class GRunner {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    _readFile(file, enc, throwErr) {
-        if(!file) return null;
-        let read = function() {
-            return fs.readFileSync(file, enc);
-        };
-        try {
-            return read();
-        } catch (e) {
-            try { // retry
-                return read();
-            }
-            catch(e) {
-                if(throwErr) throw e;
-                return null;
-            }
-        }
-    }
-
-    _writeFile(file, data, enc) {
-        if(!file) throw new Error('file');
-        mkdirp.sync(path.dirname(file));
-        fs.writeFileSync(file, data, enc);
-    }
-
     fileReadBin(file, throwErr) {
-        return this._readFile(file, null, throwErr);
+        return GUtils.readFile(file, null, throwErr);
     }
 
     fileReadTxt(file, throwErr) {
-        let data = this._readFile(file, 'utf8', throwErr);
+        let data = GUtils.readFile(file, 'utf8', throwErr);
         if(data === null) return null;
         return data.replace(/^\uFEFF/, '');
     }
@@ -401,12 +315,12 @@ class GRunner {
     }
 
     fileWriteBin(file, data) {
-        this._writeFile(file, data);
+        GUtils.writeFile(file, data);
     }
 
     fileWriteTxt(file, data) {
         if(!data) data = '';
-        this._writeFile(file, data, 'utf8');
+        GUtils.writeFile(file, data, 'utf8');
     }
 
     fileWriteJson(file, data) {
@@ -415,160 +329,13 @@ class GRunner {
     }
 
     files(dir, recursive, filter) {
-        let count = 0;
-        let error = false;
-        let filesCount = 0;
-
-        let s = through.obj(function(file, enc, cb) {
-            cb(null, file);
-        });
-
-        let onDone = function (e) {
-            if(e) {
-                error = true;
-                s.emit('error', e);
-            }
-            s.end();
-        };
-
-        let add = function(file) {
-            if(!error) {
-                file.count = ++filesCount;
-                s.write(file);
-            }
-        };
-
-        let scan = function(entryDir, dir, doneCb) {
-            count++;
-
-            let done = function(err) {
-                if(err) {
-                    doneCb(err);
-                    return;
-                }
-                count--;
-                if(!error && (count === 0)) {
-                   doneCb();
-                }
-            };
-
-            fs.readdir(dir, function(err, items) {
-                if(err) {
-                    done(err);
-                    return;
-                }
-                let dirs = [];
-                items = items || [];
-
-                for (let i = 0; i < items.length; i++) {
-                    if(error) break;
-                    let itemPath = path.join(dir, items[i]);
-                    try {
-                        let stat = fs.statSync(itemPath);
-                        if (stat.isFile()) {
-                            let fpath = path.resolve(itemPath);
-                            let rpath = fpath.substr(entryDir.length);
-                            if(rpath.startsWith('/') || rpath.startsWith('\\')) rpath = rpath.substr(1);
-                            let obj = ({dir: entryDir,
-                                path: fpath,
-                                name: items[i],
-                                ext: path.extname(items[i]) || '',
-                                relative: rpath,
-                                stats: stat });
-                            if (!filter || filter(obj)) {
-                                add(obj);
-                            }
-                        }
-                        else if (stat.isDirectory()) {
-                            dirs.push(itemPath);
-                        }
-                    } catch (e) {
-                        done(e);
-                        break;
-                    }
-                }
-
-                if(recursive) {
-                    let next = dirs.map(d => __cb => {
-                        setTimeout(function() {
-                            scan(entryDir, d, doneCb);
-                            __cb();
-                        }, 0);
-                    });
-                    __.series(next, (err) => {
-                        done(err);
-                    });
-                }
-                else {
-                    process.nextTick(done);
-                }
-            });
-
-        };
-
-        if(dir) {
-            let dirs = this._toArray(dir).map(d => __cb => {
-                d = path.resolve(d);
-                scan(d, d, function(err) {
-                    __cb(err);
-                });
-            });
-            if(dirs.length) {
-                setTimeout(function () {
-                    __.series(dirs, function (err) {
-                        onDone(err);
-                    });
-                }, 0);
-            }
-            else {
-                onDone();
-            }
-        }
-        else {
-            onDone();
-        }
-
-        return s;
+        return GUtils.files(dir, recursive, filter);
     }
 
     rm(dirOrFile) {
-
         if(!dirOrFile) return;
-        dirOrFile = this._toArray(dirOrFile);
-
-        let del = function (p) {
-            if (!p) return;
-            let stat = null;
-            try {
-                stat = fs.statSync(p);
-            } catch (e) {
-                return;
-            }
-            if (stat == null) return;
-            if (stat.isFile()) {
-                fs.unlinkSync(p);
-                return;
-            }
-            if (!stat.isDirectory()) return;
-            fs.readdirSync(p).forEach(function (item) {
-                let itemPath = path.join(p, item);
-                del(itemPath);
-            });
-            let deleted = false;
-            for (let i = 0; i < 50; i++) {
-                try {
-                    fs.rmdirSync(p);
-                    deleted = true;
-                } catch (e) {
-                }
-                if (deleted) break;
-            }
-            if (!deleted) {
-                fs.rmdirSync(p);
-            }
-        };
-
-        dirOrFile.forEach(d => del(d));
+        GUtils.toArray(dirOrFile)
+            .forEach(d => GUtils.del(d));
     }
 
 } //EOC

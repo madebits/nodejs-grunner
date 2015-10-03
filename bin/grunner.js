@@ -9,6 +9,7 @@ let __ = require('async')
     , rd = require('require-dir')
     , argv = require('yargs').usage('Usage: $0 [--gfile fileOrDir] [--gtask taskName] [--T] [--D] [--P] [--C] [--L timeMin] [--env.KEY="VALUE"]').argv
     , gv = require('../package.json').version
+    , GUtils = require('../lib/gutils')
     ;
 
 G.log(`# NodeJs: ${process.version}, GRunner: ${gv}`);
@@ -25,8 +26,8 @@ G.options.dryRun = !!argv.D;
 G.options.noLoopDetection = !!argv.C;
 if(argv.L) G.setProcessMaxLifeTime(argv.L);
 
-let paths = G._toArray(argv.gfile || './gfile.js')
-    , taskName = G._toArray(argv.gtask || 'default')
+let paths = GUtils.toArray(argv.gfile || './gfile.js')
+    , taskName = GUtils.toArray(argv.gtask || 'default')
     ;
 
 paths.forEach(f => {
