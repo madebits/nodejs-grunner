@@ -162,3 +162,50 @@ test('start pipe null', function(t) {
         t.end(err);
     });
 });
+
+test('through pipe', function(t) {
+
+    let g = new G({log: msg => { } });
+
+
+    let sequence = function* () {
+        yield 'a';
+        yield 'b';
+        yield 'c';
+    };
+
+    let res = [];
+    let res2 = [];
+
+    g.t('tt', cb => {
+        return cb.startPipe(sequence()).pipe(cb.throughPipe((o, cbFn) => {
+            res.push(o);
+            console.log(o);
+            cbFn.push(res.length);
+            cbFn(null, res.length);
+        }, cbFn => {
+            cbFn.push('abc');
+            cbFn();
+        })).pipe(through.obj((o, e, _cb) => {
+            res2.push(o);
+            console.log(o);
+            _cb();
+        }));;
+    });
+
+    g.run('tt', err => {
+        t.is(res[0], 'a');
+        t.is(res[1], 'b');
+        t.is(res[2], 'c');
+
+        t.is(res2[0], 1, '1');
+        t.is(res2[1], 1, '1');
+        t.is(res2[2], 2, '2');
+        t.is(res2[3], 2, '2');
+        t.is(res2[4], 3, '3');
+        t.is(res2[5], 3, '3');
+        t.is(res2[6], 'abc');
+
+        t.end(err);
+    });
+});

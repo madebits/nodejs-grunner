@@ -175,6 +175,7 @@ class GRunner {
         doneCb.ctx = ctx;
         doneCb.onDone = resHandler;
         doneCb.startPipe = _this._startPipe;
+        doneCb.throughPipe = _this._throughPipe;
 
         if(_this.options.beforeTaskRun) _this.options.beforeTaskRun(ctx);
         let taskFun = (task.cb && !_this.options.dryRun) ? task.cb : cb => cb();
@@ -207,6 +208,24 @@ class GRunner {
             s.end();
         });
         return s;
+    }
+
+    _throughPipe(eachFn, flushFn) {
+        return through.obj(function(o, e, cb) {
+            let _this = this;
+            if(eachFn) {
+                cb.push = _this.push.bind(_this);
+                eachFn(o, cb);
+            }
+            else cb();
+        }, function(cb) {
+            let _this = this;
+            if(flushFn) {
+                cb.push = _this.push.bind(_this);
+                flushFn(cb);
+            }
+            else cb();
+        });
     }
 
     log(msg, isErr) {
