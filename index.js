@@ -527,6 +527,9 @@ class GRunner {
 
     rm(dirOrFile) {
 
+        if(!dirOrFile) return;
+        dirOrFile = this._toArray(dirOrFile);
+
         let del = function (p) {
             if (!p) return;
             let stat = null;
@@ -559,7 +562,7 @@ class GRunner {
             }
         };
 
-        del(dirOrFile);
+        dirOrFile.forEach(d => del(d));
     }
 
 } //EOC
